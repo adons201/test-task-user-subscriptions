@@ -15,6 +15,9 @@ import ru.tms.repo.UserRepo;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * Реализация сервиса для управления пользователями.
+ */
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
@@ -22,12 +25,25 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
 
+    /**
+     * Конструктор класса UserServiceImpl.
+     *
+     * @param userRepo   Репозиторий для работы с пользователями.
+     * @param userMapper Маппер для преобразования между User и UserEntity.
+     */
     public UserServiceImpl(UserRepo userRepo, UserMapper userMapper) {
         this.userRepo = userRepo;
         this.userMapper = userMapper;
         log.info("UserService initialized");
     }
 
+    /**
+     * Получает пользователя по его ID.
+     *
+     * @param userId ID пользователя.
+     * @return UserEntity Пользователь, найденный по ID.
+     * @throws NoSuchElementException Если пользователь с указанным ID не найден.
+     */
     @Override
     public UserEntity getUserById(Long userId) {
         log.debug("Fetching user by id {}", userId);
@@ -39,12 +55,26 @@ public class UserServiceImpl implements UserService {
                 });
     }
 
+    /**
+     * Получает пользователя по его имени пользователя (username).
+     *
+     * @param username Имя пользователя (username).
+     * @return Optional<UserEntity> Пользователь, найденный по имени пользователя, или Optional.empty(), если пользователь не найден.
+     */
     @Override
     public Optional<UserEntity> getUserByUsername(String username) {
         log.debug("Fetching user by username {}", username);
         return this.userRepo.findByUsername(username);
     }
 
+    /**
+     * Создает нового пользователя.
+     *
+     * @param user DTO с данными пользователя.
+     * @return User DTO созданного пользователя.
+     * @throws InvalidElementDataException Если данные пользователя невалидны (например, пустое имя пользователя).
+     * @throws DuplicateKeyException Если пользователь с указанным именем пользователя уже существует.
+     */
     @Override
     public User createUser(User user) {
         if (user == null || user.username() == null || user.username().isEmpty()) {
@@ -62,6 +92,16 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * Обновляет существующего пользователя.
+     *
+     * @param userId ID пользователя, которого нужно обновить.
+     * @param user   DTO с новыми данными пользователя.
+     * @return User DTO обновленного пользователя.
+     * @throws InvalidElementDataException Если данные пользователя невалидны (например, пустое имя пользователя).
+     * @throws DuplicateKeyException Если пользователь с указанным именем пользователя уже существует.
+     * @throws OptimisticLockingFailureException Если не удалось обновить пользователя из-за конкурентного изменения.
+     */
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public User updateUser(Long userId, User user) {
@@ -83,6 +123,12 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * Удаляет пользователя по его ID.
+     *
+     * @param userId ID пользователя, которого нужно удалить.
+     * @throws OptimisticLockingFailureException Если не удалось удалить пользователя из-за конкурентного изменения.
+     */
     @Override
     public void deleteUser(Long userId) {
         try {
