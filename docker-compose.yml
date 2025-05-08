@@ -1,0 +1,39 @@
+name: test_task
+version: "3.9"
+services:
+  postgres:
+    image: postgres:14.8-alpine3.18
+    environment:
+      POSTGRES_DB: "user_subscriptions"
+      POSTGRES_USER: "user_subscriptions"
+      POSTGRES_PASSWORD: "user_subscriptions"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - data_postgres:/var/lib/user_subscriptions/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user_subscriptions -d user_subscriptions" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  user-subscriptions:
+    container_name: user-subscriptions
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: target/user-subscriptions-1.0-SNAPSHOT-exec.jar
+    environment:
+      SPRING_PROFILES_ACTIVE: doсker
+      DB_URL: "jdbc:postgresql://postgres:5432/user_subscriptions"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_subscriptions
+      SPRING_DATASOURCE_USERNAME: user_subscriptions
+      SPRING_DATASOURCE_PASSWORD: user_subscriptions
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+volumes:
+  data_postgres:
