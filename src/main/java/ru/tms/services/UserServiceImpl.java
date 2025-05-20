@@ -4,8 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import ru.tms.dto.User;
 import ru.tms.entity.UserEntity;
 import ru.tms.exceptions.InvalidElementDataException;
@@ -103,7 +101,6 @@ public class UserServiceImpl implements UserService {
      * @throws OptimisticLockingFailureException Если не удалось обновить пользователя из-за конкурентного изменения.
      */
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public User updateUser(Long userId, User user) {
         if (user == null || user.username() == null || user.username().isEmpty()) {
             throw new InvalidElementDataException("Invalid data when updating the user: Username is empty or missing");
